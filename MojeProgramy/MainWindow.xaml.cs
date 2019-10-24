@@ -15,8 +15,7 @@ namespace MojeProgramy
     {
 
         private int ileApek = 0;
-
-        List<Program> programs = new List<Program>
+        readonly List<Program> programs = new List<Program>
             {
                /* new Program() { Name = "SumatraPDF", Version = "3.1.2", Link="https://www.sumatrapdfreader.org/dl/SumatraPDF-3.1.2-install.exe" },
                 new Program() { Name = "VLC", Version = "3.0.8", Link = "https://get.videolan.org/vlc/3.0.8/win64/vlc-3.0.8-win64.exe"},
@@ -34,32 +33,28 @@ namespace MojeProgramy
         {
             InitializeComponent();
             ProgramList.ItemsSource = programs;
-            /*   using (Stream stream = File.Open(_serializationFile, FileMode.Create))
-
-               {
-                   var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-
-                   bformatter.Serialize(stream, ProgramList.ItemsSource);
-               }
-               */
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
             System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-            IList lista = ProgramList.Items;
-            foreach (Program itemProgram in lista)
+            if(result == System.Windows.Forms.DialogResult.OK)
             {
-                if (itemProgram.Install)
+
+                IList lista = ProgramList.Items;
+                foreach (Program itemProgram in lista)
                 {
-                    Pobierz(itemProgram.Link, dialog);
-                    ileApek++;
+                    if (itemProgram.Install)
+                    {
+                        Pobierz(itemProgram.Link, dialog);
+                        ileApek++;
+                    }
+                    this.WindowState = WindowState.Minimized;
+                    this.ShowInTaskbar = false;
                 }
-                this.WindowState = WindowState.Minimized;
-                this.ShowInTaskbar = false;
+                System.Windows.MessageBox.Show("Pobieranie bedzie dzialac w tle.\nDostaniesz powiadomienie o ukonczeniu pobierania!");
             }
-            System.Windows.MessageBox.Show("Pobieranie bedzie dzialac w tle.\nDostaniesz powiadomienie o ukonczeniu pobierania!");
         }
 
         private void Pobierz(string link, System.Windows.Forms.FolderBrowserDialog dialog = null)
@@ -85,7 +80,18 @@ namespace MojeProgramy
             Wczytaj();
         }
 
-        private void Wczytaj()
+        // jezeli chcesz zapisac liste do pliku
+        private void Zapisz()
+        {
+            using (Stream stream = File.Open(_serializationFile, FileMode.Create))
+
+            {
+                var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+
+                bformatter.Serialize(stream, ProgramList.ItemsSource);
+            }
+        }
+        public void Wczytaj()
         {
             System.Threading.Thread.Sleep(2000);
 
@@ -101,10 +107,10 @@ namespace MojeProgramy
             }
         }
 
-        private void downloadFinished(object sender, AsyncCompletedEventArgs e)
+        public void downloadFinished(object sender, AsyncCompletedEventArgs e)
         {
             ileApek--;
-            if (ileApek == 0)
+            if (ileApek < 1)
             {
 
                 System.Windows.MessageBox.Show("Pobrano wybrane aplikacje!");
@@ -120,8 +126,6 @@ namespace MojeProgramy
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             Pobierz("https://github.com/w59058/MojeProgramy/raw/master/programy.lista");
-
-
         }
 
     }
