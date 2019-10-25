@@ -8,13 +8,12 @@ using System.Windows;
 
 namespace MojeProgramy
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
 
+        /// <summary>   zmienna ileApek przechowuje informację o ilości pobieranych aplikacji w kolejce </summary>
         private int ileApek = 0;
+        /// <summary>   lista klasy Program </summary>
         readonly List<Program> programs = new List<Program>
             {
                /* new Program() { Name = "SumatraPDF", Version = "3.1.2", Link="https://www.sumatrapdfreader.org/dl/SumatraPDF-3.1.2-install.exe" },
@@ -26,7 +25,9 @@ namespace MojeProgramy
             */ new Program() { Name="f.lux", Version="4.111", Link="https://justgetflux.com/flux-setup.exe" }
             };
 
+        /// <summary>  Zmienna Gdzie przechowuje lokalizacje pulpitu uzytkownika </summary>
         public static string gdzie = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        /// <summary>  _serializationFila- sciezka do pliku </summary>
         public readonly string _serializationFile = Path.Combine(gdzie, "programy.lista");
 
         public MainWindow()
@@ -35,8 +36,10 @@ namespace MojeProgramy
             ProgramList.ItemsSource = programs;
         }
 
+        /// <summary>   Po kliknięciu w przycisk Instaluj następuje sprawdzenie zaznaczonych wpisów </summary>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            // prosba o wskazanie lokalizacji do zapisu programow do pobrania
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
             System.Windows.Forms.DialogResult result = dialog.ShowDialog();
             if(result == System.Windows.Forms.DialogResult.OK)
@@ -50,12 +53,16 @@ namespace MojeProgramy
                         Pobierz(itemProgram.Link, dialog);
                         ileApek++;
                     }
+                    // minimalizacja programu i wyswietlenie MessageBoxa
                     this.WindowState = WindowState.Minimized;
                     this.ShowInTaskbar = false;
                 }
                 System.Windows.MessageBox.Show("Pobieranie bedzie dzialac w tle.\nDostaniesz powiadomienie o ukonczeniu pobierania!");
             }
         }
+
+        /// <summary>   Funkcja pobierajaca z okreslonego adresu </summary>
+        /// <param name="link">     Adres internetowy z ktorego pobieramy program</param>
 
         private void Pobierz(string link, System.Windows.Forms.FolderBrowserDialog dialog = null)
         {
@@ -75,12 +82,13 @@ namespace MojeProgramy
             }
         }
 
+        /// <summary>   Po zakonczeniu pobierania bazy, wczyta ja do programu </summary>
         private void downloadFinishedList(object sender, AsyncCompletedEventArgs e)
         {
             Wczytaj();
         }
 
-        // jezeli chcesz zapisac liste do pliku
+        /// <summary>   jezeli chcesz zapisac liste do pliku, uzyj tej funkcji </summary>
         private void Zapisz()
         {
             using (Stream stream = File.Open(_serializationFile, FileMode.Create))
@@ -91,6 +99,8 @@ namespace MojeProgramy
                 bformatter.Serialize(stream, ProgramList.ItemsSource);
             }
         }
+
+        /// <summary>   Wczytaj funkcja Deserializuje plik bazy i wczytuje do ItemsSource </summary>
         public void Wczytaj()
         {
             System.Threading.Thread.Sleep(2000);
@@ -106,6 +116,7 @@ namespace MojeProgramy
                 }
             }
         }
+        /// <summary>   Po zakonczeniu pobierania wszystkich programow, wylacza program oraz informuje o zakonczeniu </summary>
 
         public void downloadFinished(object sender, AsyncCompletedEventArgs e)
         {
@@ -117,6 +128,8 @@ namespace MojeProgramy
                 System.Environment.Exit(0);
             }
         }
+
+
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
